@@ -11,6 +11,7 @@ from wavegrad.params import AttrDict, params as base_params
 from wavegrad.model import WaveGrad
 
 from time import time
+from armory.data.utils import maybe_download_weights_from_s3
 
 models = {}
 
@@ -22,7 +23,9 @@ class Denoiser():
       if os.path.exists(f'{model_dir}/weights.pt'):
         checkpoint = torch.load(f'{model_dir}/weights.pt')
       else:
-        checkpoint = torch.load(model_dir)
+        weights_path = maybe_download_weights_from_s3(model_dir)
+        checkpoint = torch.load(weights_path)
+        # checkpoint = torch.load(model_dir)
       model = WaveGrad(AttrDict(base_params)).to(device)
       model.load_state_dict(checkpoint['model'])
       model.eval()
